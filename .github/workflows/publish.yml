@@ -1,0 +1,86 @@
+name: Publish to npm
+
+# Publishes @vtx-labs/har2api to npm via OIDC trusted publishing.
+#
+# Authentication uses short-lived, workflow-scoped OIDC credentials -- there is
+# no npm token to store, leak, or rotate, and provenance is attested
+# automatically. Manual dispatch only, gated behind the `release` environment,
+# and restricted to the canonical repository.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Run every step except the actual npm publish"
+        type: boolean
+        default: false
+
+# contents: read to check out; id-token: write to mint the OIDC credential.
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build, verify & publish
+    runs-on: ubuntu-latest
+    # Run only on the canonical repository, never on a fork.
+    if: ${{ github.repository == 'VTX-Labs/har2api' }}
+    # Configure required reviewers and branch protection on this environment in
+    # repo Settings -> Environments.
+    environment:
+      name: release
+      url: https://www.npmjs.com/package/@vtx-labs/har2api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      # v6 reads the pnpm version from package.json's "packageManager" field;
+      # do not also set "version" here or the action errors on the conflict.
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      # Trusted publishing requires npm >= 11.5.1.
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck, test, build
+        run: |
+          pnpm typecheck
+          pnpm test
+          pnpm build
+
+      - name: Verify version is not already published
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Publishing $NAME@$VERSION"
+          if pnpm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "::error::$NAME@$VERSION already exists on npm. Bump the version in package.json."
+            exit 1
+          fi
+
+      # No token needed: npm authenticates with the OIDC id-token.
+      - name: Publish
+        if: ${{ inputs.dry-run == false }}
+        run: npm publish --access public
+
+      - name: Dry run summary
+        if: ${{ inputs.dry-run == true }}
+        run: echo "Dry run complete. Build, test, and verify passed; publish skipped."

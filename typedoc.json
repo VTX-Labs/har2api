@@ -1,0 +1,19 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "har2api",
+  "readme": "README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "categorizeByGroup": true,
+  "hideGenerator": true,
+  "plugin": ["typedoc-material-theme"],
+  "themeColor": "#3182ce",
+  "navigationLinks": {
+    "npm": "https://www.npmjs.com/package/@vtx-labs/har2api",
+    "GitHub": "https://github.com/VTX-Labs/har2api",
+    "VTX Labs": "https://vtxlabs.dev"
+  }
+}

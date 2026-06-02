@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Generated API docs (built fresh in CI, published to GitHub Pages).
+docs/
+
+# HAR files can contain real auth tokens and PII — never commit captures.
+*.har
+!test/**/*.har

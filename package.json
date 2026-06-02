@@ -1,0 +1,65 @@
+{
+  "name": "@vtx-labs/har2api",
+  "version": "0.1.0",
+  "description": "Turn a browser .har capture into an OpenAPI 3.1 spec, a Postman collection, and cURL commands — offline, zero-dependency.",
+  "keywords": [
+    "har",
+    "openapi",
+    "openapi3",
+    "swagger",
+    "postman",
+    "curl",
+    "api",
+    "reverse-engineering",
+    "schema-inference",
+    "cli",
+    "vtx-labs"
+  ],
+  "homepage": "https://github.com/VTX-Labs/har2api#readme",
+  "bugs": "https://github.com/VTX-Labs/har2api/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VTX-Labs/har2api.git"
+  },
+  "license": "MIT",
+  "author": "VTX Labs (https://vtxlabs.dev)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "har2api": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "docs": "typedoc",
+    "prepublishOnly": "pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typedoc": "^0.28.0",
+    "typedoc-material-theme": "^1.4.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "yaml": "^2.9.0"
+  },
+  "packageManager": "pnpm@10.6.5"
+}
